@@ -1,7 +1,7 @@
 #include "anymap.h"
 
 template<typename T>
-AnyMap<T>::AnyMap<T>(int width, int height) {
+AnyMap<T>::AnyMap(int width, int height) {
     this->width = width;
     this->height = height;
     this->map = new T*[height];
@@ -12,7 +12,7 @@ AnyMap<T>::AnyMap<T>(int width, int height) {
 
 
 template<typename T>
-Anymap<T>::Anymap<T>(int width, int height, T** map){
+AnyMap<T>::AnyMap(int width, int height, T** map){
     this->width = width;
     this->height = height;
     this->map = new T*[height];
@@ -26,7 +26,7 @@ Anymap<T>::Anymap<T>(int width, int height, T** map){
 
 
 template<typename T>
-Anymap<T>::~Anymap<T>(){
+AnyMap<T>::~AnyMap(){
     for(int i = 0;i < this->height; i++){
         for(int j = 0;j < this->width; j++){
             delete this->map[i][j];
