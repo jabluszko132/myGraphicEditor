@@ -1,6 +1,9 @@
 #include "anymap.h"
 
 template<typename T>
+AnyMap<T>::AnyMap(){}
+
+template<typename T>
 AnyMap<T>::AnyMap(int width, int height) {
     this->width = width;
     this->height = height;
