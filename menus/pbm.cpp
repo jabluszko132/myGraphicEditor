@@ -33,6 +33,7 @@ PBM PBM::fromFile(std::ifstream s){
     bool** map = new bool*[height];
 
     for(int i = 0; i < height; i++){
+        while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
         map[i] = new bool[width];
         whitespacePos = 1;
         for(int j = 0; j < width; j++){ //because last position terminates in \n not space

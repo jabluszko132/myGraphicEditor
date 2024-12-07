@@ -32,6 +32,7 @@ PGM PGM::fromFile(std::ifstream s){
 
     std::byte** map = new std::byte*[height];
     for(int i = 0; i < height; i++){
+        while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
         map[i] = new std::byte[width];
         prevWhitespacePos = 0;
         for(int j = 0; j < width; j++){ //because last position terminates in \n not space
