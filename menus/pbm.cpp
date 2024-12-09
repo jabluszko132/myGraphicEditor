@@ -1,8 +1,9 @@
 #include "pbm.h"
+#include "AnyMap.h"
 
 
-PBM::PBM(int width, int height): AnyMap<bool>(width,height){}
-PBM::PBM(int width, int height, bool** map): AnyMap<bool>(width, height, map) {}
+PBM::PBM(int width, int height): AnyMap<bool>::AnyMap(width,height){}
+PBM::PBM(int width, int height, bool** map): AnyMap<bool>::AnyMap(width,height,map){}
 
 void PBM::save(std::ofstream s){
     s<<this->header<<'\n';
@@ -44,3 +45,5 @@ PBM PBM::fromFile(std::ifstream s){
 
     return PBM(width,height,map);
 }
+
+PBM::~PBM(){}

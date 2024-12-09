@@ -6,8 +6,6 @@
 class PBM : public AnyMap<bool>
 {
 public:
-    int width;
-    int height;
     const std::string header;
     bool** map;
     static PBM fromFile(std::ifstream s);

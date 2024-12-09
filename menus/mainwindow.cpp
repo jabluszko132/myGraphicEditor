@@ -60,7 +60,40 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::newFile()
 {
-    infoLabel->setText(tr("Invoked <b>File|New</b>"));
+    QFileDialog fileDialog = QFileDialog(this,
+                                         tr("Create file"),
+                                         "",
+                                         tr("Portable bitmap (*.pbm);;Portable graymap (*.pgm);;Portable pixmap (*.ppm)")
+                                         );
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.exec();
+    QObject::connect(&fileDialog,SIGNAL(fileSelected(QString)),SLOT(newFileContinue(QString)));
+    // QString filePath = QFileDialog::getSaveFileName(this,
+    //                                                 tr("Create file"),
+    //                                                 "",
+    //                                                 tr("Portable bitmap (*.pbm);;Portable graymap (*.pgm);;Portable pixmap (*.ppm)")
+    //                                                 );
+
+}
+
+void MainWindow::newFileContinue(QString filePath){QDialog sizeDialog = QDialog(this);
+    QFormLayout form(&sizeDialog);
+
+    form.addRow(new QLabel("How many pixels?"));
+
+    QTextEdit widthIn(&sizeDialog);
+    QTextEdit heightIn(&sizeDialog);
+
+
+    form.addRow("Width: ",&widthIn);
+    form.addRow("Height: ",&heightIn);
+
+    QDialogButtonBox acceptBtn(QDialogButtonBox::Ok, &sizeDialog);
+
+    form.addRow(&acceptBtn);
+
+    QObject::connect(&acceptBtn, SIGNAL(accepted()), &sizeDialog, SLOT(accept()));
+    infoLabel->setText(tr("Invoked <b>File|New</b> Its name is: ", filePath.toStdString().c_str()));
 }
 
 void MainWindow::open()

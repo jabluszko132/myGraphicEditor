@@ -13,5 +13,5 @@ SOURCES       = mainwindow.cpp \
                 ppm.cpp
 
 # install
-target.path = $$[QT_INSTALL_EXAMPLES]/widgets/mainwindows/menus
+target.path = /build
 INSTALLS += target

@@ -1,7 +1,7 @@
 #include "pgm.h"
 
-PGM::PGM(int width, int height): AnyMap<std::byte>(width, height){}
-PGM::PGM(int width, int height, std::byte** map): AnyMap<std::byte>(width, height, map) {}
+PGM::PGM(int width, int height): AnyMap<std::byte>::AnyMap(width, height){}
+PGM::PGM(int width, int height, std::byte** map): AnyMap<std::byte>::AnyMap(width, height, map) {}
 
 void PGM::save(std::ofstream s){
     s<<this->header<<'\n';
@@ -49,3 +49,5 @@ PGM PGM::fromFile(std::ifstream s){
 
     return PGM(width,height,map);
 }
+
+PGM::~PGM(){}
