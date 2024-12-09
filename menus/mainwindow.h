@@ -21,9 +21,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow();
 
-public slots:
-    void newFileContinue(QString filePath);
-
 protected:
 #ifndef QT_NO_CONTEXTMENU
     void contextMenuEvent(QContextMenuEvent *event) override;
@@ -33,6 +30,7 @@ protected:
 //! [1]
 private slots:
     void newFile();
+    void newFileContinue(QString filePath);
     void open();
     void save();
     void print();
@@ -60,6 +58,8 @@ private:
 //! [2]
 
 //! [3]
+    QString filePath;
+
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *formatMenu;
