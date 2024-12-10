@@ -1,19 +1,20 @@
 #ifndef PPM_H
 #define PPM_H
 
-#include <string>
-#include <fstream>
+#include <QString>
+#include <qfile.h>
+#include <qtextstream.h>
 
 class PPM
 {
 public:
     int width;
     int height;
-    const std::string header;
+    const QString header{"ppm"};
     const std::byte colorMaxVal{255};
     std::byte*** map; //order of colors in top lvl of the array is RGB
-    static PPM fromFile(std::ifstream s);
-    void save(std::ofstream s);
+    static PPM fromFile(QFile *s);
+    void save(QFile *s);
     PPM(int width, int height);
     PPM(int width, int height, std::byte*** map);
     ~PPM();

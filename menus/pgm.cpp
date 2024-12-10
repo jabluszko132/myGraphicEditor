@@ -1,12 +1,24 @@
 #include "pgm.h"
 
-PGM::PGM(int width, int height): AnyMap<std::byte>::AnyMap(width, height){}
-PGM::PGM(int width, int height, std::byte** map): AnyMap<std::byte>::AnyMap(width, height, map) {}
+PGM::PGM(int width, int height){
+    this->width = width;
+    this->height = height;
+    this->map = new std::byte*[height];
+    for(int i = 0; i < height; i++){
+        this->map[i] = new std::byte[width];
+    }
+}
+PGM::PGM(int width, int height, std::byte** map){
+    this->width = width;
+    this->height = height;
+    this->map = map;
+}
 
-void PGM::save(std::ofstream s){
+void PGM::save(QFile *file){
+    QTextStream s{file};
     s<<this->header<<'\n';
     s<<this->width<<' '<<this->height<<'\n';
-    s<<(int)this->colorMaxVal;
+    s<<(int)this->colorMaxVal<<'\n';
     for(int i = 0;i < this->height; i++){
         for(int j = 0;j < this->width; j++){
             s<<(int)this->map[i][j]<<' ';
@@ -15,24 +27,32 @@ void PGM::save(std::ofstream s){
     }
 }
 
-PGM PGM::fromFile(std::ifstream s){
-
-    std::string buffer;
+PGM PGM::fromFile(QFile *file){
+    QTextStream s{file};
+    QString buffer;
     int whitespacePos, prevWhitespacePos;
 
-    std::string header;
+    QString header;
     int width, height;
-    while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
-    std::getline(s,buffer); //skips the header
-    while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
 
-    whitespacePos = buffer.find(' ');
-    height = std::stoi(buffer.substr(0, whitespacePos - 1));
-    width = std::stoi(buffer.substr(buffer.find(whitespacePos + 1, buffer.length())));
+    do{
+        buffer = s.readLine();
+    }while(buffer[0] == '#'); //comment lines begin with #
+    s.readLine(); //skips the header
+
+    do{
+        buffer = s.readLine();
+    }while(buffer[0] == '#'); //comment lines begin with #
+
+    whitespacePos = buffer.indexOf(' ');
+    height = buffer.left(whitespacePos).toInt();
+    width = buffer.right(whitespacePos).toInt();
 
     std::byte** map = new std::byte*[height];
     for(int i = 0; i < height; i++){
-        while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
+        do{
+            buffer = s.readLine();
+        }while(buffer[0] == '#'); //comment lines begin with #
         map[i] = new std::byte[width];
         prevWhitespacePos = 0;
         for(int j = 0; j < width; j++){ //because last position terminates in \n not space
@@ -42,7 +62,7 @@ PGM PGM::fromFile(std::ifstream s){
                     break;
                 }
             }
-            map[i][j] = (std::byte)(std::stoi(buffer.substr(prevWhitespacePos + 1, whitespacePos + 1)));
+            map[i][j] = (std::byte)(buffer.sliced(prevWhitespacePos + 1, prevWhitespacePos - whitespacePos).toInt());
             prevWhitespacePos = whitespacePos;
         }
     }
@@ -50,4 +70,9 @@ PGM PGM::fromFile(std::ifstream s){
     return PGM(width,height,map);
 }
 
-PGM::~PGM(){}
+PGM::~PGM(){
+    for(int i = 0;i < this->height; i++){
+        delete [] this->map[i];
+    }
+    delete [] this->map;
+}

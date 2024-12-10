@@ -1,12 +1,23 @@
 #include "pbm.h"
-#include "AnyMap.h"
 
 
-PBM::PBM(int width, int height): AnyMap<bool>::AnyMap(width,height){}
-PBM::PBM(int width, int height, bool** map): AnyMap<bool>::AnyMap(width,height,map){}
+PBM::PBM(int width, int height){
+    this->width = width;
+    this->height = height;
+    this->map = new bool*[height];
+    for(int i = 0; i < height; i++){
+        this->map[i] = new bool[width];
+    }
+}
+PBM::PBM(int width, int height, bool** map){
+    this->width = width;
+    this->height = height;
+    this->map = map;
+}
 
-void PBM::save(std::ofstream s){
-    s<<this->header<<'\n';
+void PBM::save(QFile *file){
+    QTextStream s{file};
+    s<<this->header.c_str()<<'\n';
     s<<this->width<<' '<<this->height<<'\n';
     for(int i = 0;i < this->height; i++){
         for(int j = 0;j < this->width; j++){
@@ -16,25 +27,33 @@ void PBM::save(std::ofstream s){
     }
 }
 
-PBM PBM::fromFile(std::ifstream s){
+PBM PBM::fromFile(QFile *file){
 
-    std::string buffer;
+    QTextStream s{file};
+
+    QString buffer;
     int whitespacePos;
 
-    std::string header;
+    QString header;
     int width, height;
-    while(std::getline(s,buffer) && buffer[0] == '#'); //comment lines begin with #
-    std::getline(s,buffer); //skips the header
-    while(std::getline(s,buffer) && buffer[0] == '#'); //comment lines begin with #
+    do{
+        buffer = s.readLine();
+    }while(buffer[0] == '#'); //comment lines begin with #
+    s.readLine(); //skips the header
+    do{
+        buffer = s.readLine();
+    }while(buffer[0] == '#'); //comment lines begin with #
 
-    whitespacePos = buffer.find(' ');
-    height = std::stoi(buffer.substr(0,whitespacePos- 1));
-    width = std::stoi(buffer.substr(buffer.find(whitespacePos+ 1, buffer.length())));
+    whitespacePos = buffer.indexOf(' ');
+    height = buffer.left(whitespacePos).toInt();
+    width = buffer.right(whitespacePos).toInt();
 
     bool** map = new bool*[height];
 
     for(int i = 0; i < height; i++){
-        while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
+        do{
+            buffer = s.readLine();
+        }while(buffer[0] == '#'); //comment lines begin with #
         map[i] = new bool[width];
         whitespacePos = 1;
         for(int j = 0; j < width; j++){ //because last position terminates in \n not space
@@ -46,4 +65,9 @@ PBM PBM::fromFile(std::ifstream s){
     return PBM(width,height,map);
 }
 
-PBM::~PBM(){}
+PBM::~PBM(){
+    for(int i = 0;i < this->height; i++){
+        delete [] this->map[i];
+    }
+    delete [] this->map;
+}

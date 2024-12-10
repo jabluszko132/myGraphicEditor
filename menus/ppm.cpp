@@ -31,25 +31,31 @@ PPM::~PPM(){
 
 
 
-PPM PPM::fromFile(std::ifstream s){
-
-    std::string buffer;
+PPM PPM::fromFile(QFile *file){
+    QTextStream s{file};
+    QString buffer;
     int whitespacePos, prevWhitespacePos;
 
-    std::string header;
+    QString header;
     int width, height;
-    while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
-    std::getline(s,buffer); //skips the header
-    while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
+    do{
+        buffer = s.readLine();
+    }while(buffer[0] == '#'); //comment lines begin with #
+    s.readLine(); //skips the header
+    do{
+        buffer = s.readLine();
+    }while(buffer[0] == '#'); //comment lines begin with #
 
-    whitespacePos = buffer.find(' ');
-    height = std::stoi(buffer.substr(0, whitespacePos - 1));
-    width = std::stoi(buffer.substr(buffer.find(whitespacePos + 1, buffer.length())));
+    whitespacePos = buffer.indexOf(' ');
+    height = buffer.left(whitespacePos).toInt();
+    width = buffer.right(whitespacePos).toInt();
 
     std::byte*** map = new std::byte**[height];
     int colorIter;
     for(int i = 0; i < height; i++){
-        while(std::getline(s, buffer) && buffer[0] == '#'); //comment lines begin with #
+        do{
+            buffer = s.readLine();
+        }while(buffer[0] == '#'); //comment lines begin with #
         map[i] = new std::byte*[width];
         prevWhitespacePos = 0;
         colorIter = 0;
@@ -60,7 +66,7 @@ PPM PPM::fromFile(std::ifstream s){
                     break;
                 }
             }
-            map[i][j][colorIter++] = (std::byte)(std::stoi(buffer.substr(prevWhitespacePos + 1, whitespacePos + 1)));
+            map[i][j][colorIter++] = (std::byte)(buffer.sliced(prevWhitespacePos + 1, prevWhitespacePos - whitespacePos).toInt());
             prevWhitespacePos = whitespacePos;
         }
     }
@@ -68,10 +74,11 @@ PPM PPM::fromFile(std::ifstream s){
     return PPM(width, height, map);
 }
 
-void PPM::save(std::ofstream s){
+void PPM::save(QFile *file){
+    QTextStream s{file};
     s<<this->header<<'\n';
     s<<this->width<<' '<<this->height<<'\n';
-    s<<(int)this->colorMaxVal;
+    s<<(int)this->colorMaxVal<<'\n';
     for(int i = 0;i < this->height; i++){
         for(int j = 0;j < this->width; j++){
             for(int k = 0; k < 3; k++){
