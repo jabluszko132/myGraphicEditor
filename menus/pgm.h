@@ -9,7 +9,7 @@ class PGM{
 public:
     int width;
     int height;
-    const QString header{"pgm"};
+    const QString header{"P2"};
     const std::byte colorMaxVal{255};
     std::byte** map;
     static PGM fromFile(QFile *file);

@@ -11,28 +11,40 @@
 //! [0]
 MainWindow::MainWindow()
 {
-    QWidget *widget = new QWidget;
-    setCentralWidget(widget);
+    mainWidget = new QWidget;
+    displayedFile = new QImage();
+    setCentralWidget(mainWidget);
 //! [0]
 
 //! [1]
     QWidget *topFiller = new QWidget;
     topFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+
+    imageLabel = new QLabel();
+    imageLabel->setAlignment(Qt::AlignCenter);
+    imageLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    imageLabel->resize(300,300);
+    imageLabel->setScaledContents(true);
     infoLabel = new QLabel(tr("<i>Choose a menu option, or right-click to "
                               "invoke a context menu</i>"));
     infoLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     infoLabel->setAlignment(Qt::AlignCenter);
 
+
     QWidget *bottomFiller = new QWidget;
     bottomFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->setContentsMargins(5, 5, 5, 5);
-    layout->addWidget(topFiller);
-    layout->addWidget(infoLabel);
-    layout->addWidget(bottomFiller);
-    widget->setLayout(layout);
+    mainLayout = new QVBoxLayout;
+    mainLayout->setContentsMargins(5, 5, 5, 5);
+    mainLayout->addWidget(topFiller);
+    if(!isFileDisplayed){
+        mainLayout->addWidget(infoLabel);
+    }else{
+        mainLayout->addWidget(imageLabel);
+    }
+    mainLayout->addWidget(bottomFiller);
+    mainWidget->setLayout(mainLayout);
 //! [1]
 
 //! [2]
@@ -63,19 +75,20 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::newFile()
 {
-    filePath = QFileDialog::getSaveFileName(this,
+    QString newFilePath = QFileDialog::getSaveFileName(this,
                                                     tr("Create file"),
                                                     "",
                                                     tr("Portable bitmap (*.pbm);;Portable graymap (*.pgm);;Portable pixmap (*.ppm)")
                                                     );
 
-    if(!filePath.isEmpty()){
-        getImageDimensions(filePath);
+    if(!newFilePath.isEmpty()){
+        filePath = newFilePath;
+        getImageDimensions();
         return;
     }
 }
 
-void MainWindow::getImageDimensions(QString filePath){
+void MainWindow::getImageDimensions(){
     QDialog sizeDialog(this);
     QFormLayout form(&sizeDialog);
 
@@ -101,6 +114,10 @@ void MainWindow::getImageDimensions(QString filePath){
     if(sizeDialog.exec()){
         QString fileExt = filePath.section('.',-1);
         qDebug() << fileExt;
+        if(workFile) {
+            workFile->close();
+            delete workFile;
+        }
         workFile = new QFile(filePath);
         workFile->open(QIODevice::WriteOnly | QIODevice::Text);
         if(fileExt == "pbm"){
@@ -115,13 +132,40 @@ void MainWindow::getImageDimensions(QString filePath){
         }else{
             throw QUnhandledException();
         }
+        displayFile();
         return;
     }
 }
 
 void MainWindow::open()
 {
-    infoLabel->setText(tr("Invoked <b>File|Open</b>"));
+    QString chosenPath = QFileDialog::getOpenFileName(this,
+                                            tr("Open file"),
+                                            "",
+                                            tr("Portable bitmap (*.pbm);;Portable graymap (*.pgm);;Portable pixmap (*.ppm)")
+                                            );
+
+    if(!chosenPath.isEmpty()){
+        filePath = chosenPath;
+        if(workFile) {
+            workFile->close();
+            delete workFile;
+        }
+        workFile = new QFile(filePath);
+        displayFile();
+        return;
+    }
+}
+
+void MainWindow::displayFile(){
+    qDebug() << filePath;
+    qDebug() << displayedFile->load(filePath);
+    infoLabel->setText("");
+    infoLabel->setPixmap(QPixmap::fromImage(*displayedFile));
+    infoLabel->resize(300,300);
+    // imageLabel->setPixmap(QPixmap::fromImage(*displayedFile));
+
+    return;
 }
 
 void MainWindow::save()

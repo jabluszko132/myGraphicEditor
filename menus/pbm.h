@@ -9,7 +9,7 @@ class PBM
 public:
     int width;
     int height;
-    const std::string header{"pbm"};
+    const std::string header{"P1"};
     bool** map;
     static PBM fromFile(QFile *file);
     void save(QFile *file);

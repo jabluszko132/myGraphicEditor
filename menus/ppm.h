@@ -10,7 +10,7 @@ class PPM
 public:
     int width;
     int height;
-    const QString header{"ppm"};
+    const QString header{"P3"};
     const std::byte colorMaxVal{255};
     std::byte*** map; //order of colors in top lvl of the array is RGB
     static PPM fromFile(QFile *s);

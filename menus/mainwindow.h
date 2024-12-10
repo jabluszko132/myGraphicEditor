@@ -5,6 +5,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <qboxlayout.h>
 #include <qfile.h>
 
 QT_BEGIN_NAMESPACE
@@ -55,16 +56,19 @@ private slots:
 private:
     void createActions();
     void createMenus();
-    void getImageDimensions(QString filePath);
+    void getImageDimensions();
 //! [2]
 
 //! [3]
-
+    bool isFileDisplayed{false};
     void *currentMap{nullptr};
     QFile *workFile{nullptr};
+    QImage *displayedFile;
 
     QString filePath;
 
+    QWidget *mainWidget;
+    QVBoxLayout *mainLayout;
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *formatMenu;
@@ -91,6 +95,8 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
     QLabel *infoLabel;
+    QLabel *imageLabel;
+    void displayFile();
 };
 //! [3]
 
