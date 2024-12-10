@@ -5,6 +5,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <qfile.h>
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -30,7 +31,6 @@ protected:
 //! [1]
 private slots:
     void newFile();
-    void newFileContinue(QString filePath);
     void open();
     void save();
     void print();
@@ -55,9 +55,14 @@ private slots:
 private:
     void createActions();
     void createMenus();
+    void getImageDimensions(QString filePath);
 //! [2]
 
 //! [3]
+
+    void *currentMap{nullptr};
+    QFile *workFile{nullptr};
+
     QString filePath;
 
     QMenu *fileMenu;

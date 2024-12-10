@@ -4,6 +4,9 @@
 #include <QtWidgets>
 
 #include "mainwindow.h"
+#include "pbm.h"
+#include "pgm.h"
+#include "ppm.h"
 
 //! [0]
 MainWindow::MainWindow()
@@ -39,7 +42,7 @@ MainWindow::MainWindow()
     QString message = tr("A context menu is available by right-clicking");
     statusBar()->showMessage(message);
 
-    setWindowTitle(tr("Menus"));
+    setWindowTitle(tr("Pimp.exe"));
     setMinimumSize(160, 160);
     resize(480, 320);
 }
@@ -60,9 +63,6 @@ void MainWindow::contextMenuEvent(QContextMenuEvent *event)
 
 void MainWindow::newFile()
 {
-    // fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    // QObject::connect(&fileDialog,SIGNAL(fileSelected(QString)),SLOT(newFileContinue(QString)));
-
     filePath = QFileDialog::getSaveFileName(this,
                                                     tr("Create file"),
                                                     "",
@@ -70,42 +70,12 @@ void MainWindow::newFile()
                                                     );
 
     if(!filePath.isEmpty()){
-        // QDialog sizeDialog(this);
-        // QFormLayout form(&sizeDialog);
-
-        // form.addRow(new QLabel("How many pixels?"));
-
-
-        // QSpinBox widthIn(&sizeDialog);
-        // QSpinBox heightIn(&sizeDialog);
-
-        // widthIn.setRange(1,35);
-        // heightIn.setRange(1,999);
-
-        // form.addRow("Width: ",&widthIn);
-        // form.addRow("Height: ",&heightIn);
-
-        // QDialogButtonBox acceptBtn(QDialogButtonBox::Ok, &sizeDialog);
-
-        // form.addRow(&acceptBtn);
-
-        // QObject::connect(&acceptBtn, SIGNAL(accepted()), &sizeDialog, SLOT(accept()));
-
-
-        QString response = "Invoked <b>File|New</b> Its name is: " + filePath;
-        infoLabel->setText(tr(response.toStdString().c_str()));
-
+        getImageDimensions(filePath);
+        return;
     }
-
-    // QString filePath = QFileDialog::getSaveFileName(this,
-    //                                                 tr("Create file"),
-    //                                                 "",
-    //                                                 tr("Portable bitmap (*.pbm);;Portable graymap (*.pgm);;Portable pixmap (*.ppm)")
-    //                                                 );
-
 }
 
-void MainWindow::newFileContinue(QString filePath){
+void MainWindow::getImageDimensions(QString filePath){
     QDialog sizeDialog(this);
     QFormLayout form(&sizeDialog);
 
@@ -125,10 +95,27 @@ void MainWindow::newFileContinue(QString filePath){
 
     form.addRow(&acceptBtn);
 
-    QObject::connect(&acceptBtn, SIGNAL(accepted()), &sizeDialog, SLOT(accept()));
 
-    if(!sizeDialog.exec()){
-        infoLabel->setText(tr("Invoked <b>File|New</b> Its name is: ",filePath.toStdString().c_str()));
+
+    QObject::connect(&acceptBtn, SIGNAL(accepted()), &sizeDialog, SLOT(accept()));
+    if(sizeDialog.exec()){
+        QString fileExt = filePath.section('.',-1);
+        qDebug() << fileExt;
+        workFile = new QFile(filePath);
+        workFile->open(QIODevice::WriteOnly | QIODevice::Text);
+        if(fileExt == "pbm"){
+            currentMap = new PBM(widthIn.value(),heightIn.value());
+            ((PBM*)currentMap)->save(workFile);
+        }else if(fileExt == "pgm"){
+            currentMap = new PGM(widthIn.value(),heightIn.value());
+            ((PGM*)currentMap)->save(workFile);
+        }else if(fileExt == "ppm"){
+            currentMap = new PPM(widthIn.value(),heightIn.value());
+            ((PPM*)currentMap)->save(workFile);
+        }else{
+            throw QUnhandledException();
+        }
+        return;
     }
 }
 
