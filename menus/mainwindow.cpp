@@ -20,6 +20,7 @@ MainWindow::MainWindow()
                               "invoke a context menu</i>"));
     infoLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     infoLabel->setAlignment(Qt::AlignCenter);
+    infoLabel->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
 
     QWidget *bottomFiller = new QWidget;
@@ -104,7 +105,7 @@ void MainWindow::getImageDimensions(){
             delete workFile; //close() implicitly called in destr
         }
         workFile = new QFile(filePath);
-        workFile->open(QIODevice::WriteOnly | QIODevice::Text);
+        workFile->open(QIODevice::ReadWrite | QIODevice::Text);
         if(displayedFile) delete displayedFile;
         if(fileExt == "pbm"){
             displayedFile = AnyMapFileHandler::newP4(widthIn.value(),heightIn.value());
@@ -132,10 +133,10 @@ void MainWindow::open()
     if(!chosenPath.isEmpty()){
         filePath = chosenPath;
         if(workFile) {
-            workFile->close();
             delete workFile;
         }
         workFile = new QFile(filePath);
+        workFile->open(QIODevice::ReadWrite | QIODevice::Text);
         displayedFile = AnyMapFileHandler::load(workFile);
         displayFile();
         return;
@@ -143,12 +144,10 @@ void MainWindow::open()
 }
 
 void MainWindow::displayFile(){
-    qDebug() << filePath;
-    qDebug() << displayedFile->load(filePath);
     infoLabel->setText("");
     infoLabel->setPixmap(QPixmap::fromImage(*displayedFile));
-    infoLabel->setScaledContents(false);
-    infoLabel->resize(300,300);
+    infoLabel->setScaledContents(true);
+    infoLabel->resize(800,800);
     // imageLabel->setPixmap(QPixmap::fromImage(*displayedFile));
 
     return;
