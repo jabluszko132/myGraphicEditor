@@ -1,14 +1,10 @@
 QT += widgets
 
 HEADERS       = mainwindow.h \
-    pbm.h \
-    pgm.h \
-    ppm.h
+    anymapfilehandler.h
 SOURCES       = mainwindow.cpp \
-                main.cpp \
-                pbm.cpp \
-                pgm.cpp \
-                ppm.cpp
+                anymapfilehandler.cpp \
+                main.cpp
 
 # install
 target.path = /build

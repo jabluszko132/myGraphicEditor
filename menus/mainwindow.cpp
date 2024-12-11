@@ -3,11 +3,8 @@
 
 #include <QtWidgets>
 
+#include "anymapfilehandler.h"
 #include "mainwindow.h"
-#include "pbm.h"
-#include "pgm.h"
-#include "ppm.h"
-
 //! [0]
 MainWindow::MainWindow()
 {
@@ -19,13 +16,6 @@ MainWindow::MainWindow()
 //! [1]
     QWidget *topFiller = new QWidget;
     topFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-
-    imageLabel = new QLabel();
-    imageLabel->setAlignment(Qt::AlignCenter);
-    imageLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-    imageLabel->resize(300,300);
-    imageLabel->setScaledContents(true);
     infoLabel = new QLabel(tr("<i>Choose a menu option, or right-click to "
                               "invoke a context menu</i>"));
     infoLabel->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
@@ -36,13 +26,9 @@ MainWindow::MainWindow()
     bottomFiller->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     mainLayout = new QVBoxLayout;
-    mainLayout->setContentsMargins(5, 5, 5, 5);
+    mainLayout->setContentsMargins(5, 0, 5, 0);
     mainLayout->addWidget(topFiller);
-    if(!isFileDisplayed){
-        mainLayout->addWidget(infoLabel);
-    }else{
-        mainLayout->addWidget(imageLabel);
-    }
+    mainLayout->addWidget(infoLabel);
     mainLayout->addWidget(bottomFiller);
     mainWidget->setLayout(mainLayout);
 //! [1]
@@ -55,8 +41,8 @@ MainWindow::MainWindow()
     statusBar()->showMessage(message);
 
     setWindowTitle(tr("Pimp.exe"));
-    setMinimumSize(160, 160);
-    resize(480, 320);
+    setMinimumSize(480, 329);
+    resize(1280, 720);
 }
 //! [2]
 
@@ -98,7 +84,7 @@ void MainWindow::getImageDimensions(){
     QSpinBox widthIn(&sizeDialog);
     QSpinBox heightIn(&sizeDialog);
 
-    widthIn.setRange(1,35);
+    widthIn.setRange(1,999);
     heightIn.setRange(1,999);
 
     form.addRow("Width: ",&widthIn);
@@ -115,23 +101,21 @@ void MainWindow::getImageDimensions(){
         QString fileExt = filePath.section('.',-1);
         qDebug() << fileExt;
         if(workFile) {
-            workFile->close();
-            delete workFile;
+            delete workFile; //close() implicitly called in destr
         }
         workFile = new QFile(filePath);
         workFile->open(QIODevice::WriteOnly | QIODevice::Text);
+        if(displayedFile) delete displayedFile;
         if(fileExt == "pbm"){
-            currentMap = new PBM(widthIn.value(),heightIn.value());
-            ((PBM*)currentMap)->save(workFile);
+            displayedFile = AnyMapFileHandler::newP4(widthIn.value(),heightIn.value());
         }else if(fileExt == "pgm"){
-            currentMap = new PGM(widthIn.value(),heightIn.value());
-            ((PGM*)currentMap)->save(workFile);
+            displayedFile = AnyMapFileHandler::newP5(widthIn.value(),heightIn.value());
         }else if(fileExt == "ppm"){
-            currentMap = new PPM(widthIn.value(),heightIn.value());
-            ((PPM*)currentMap)->save(workFile);
+            displayedFile = AnyMapFileHandler::newP6(widthIn.value(),heightIn.value());
         }else{
             throw QUnhandledException();
         }
+        displayedFile->save(workFile);
         displayFile();
         return;
     }
@@ -152,6 +136,7 @@ void MainWindow::open()
             delete workFile;
         }
         workFile = new QFile(filePath);
+        displayedFile = AnyMapFileHandler::load(workFile);
         displayFile();
         return;
     }
@@ -162,6 +147,7 @@ void MainWindow::displayFile(){
     qDebug() << displayedFile->load(filePath);
     infoLabel->setText("");
     infoLabel->setPixmap(QPixmap::fromImage(*displayedFile));
+    infoLabel->setScaledContents(false);
     infoLabel->resize(300,300);
     // imageLabel->setPixmap(QPixmap::fromImage(*displayedFile));
 

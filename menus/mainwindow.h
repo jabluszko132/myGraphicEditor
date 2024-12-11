@@ -61,7 +61,6 @@ private:
 
 //! [3]
     bool isFileDisplayed{false};
-    void *currentMap{nullptr};
     QFile *workFile{nullptr};
     QImage *displayedFile;
 
@@ -95,7 +94,6 @@ private:
     QAction *aboutAct;
     QAction *aboutQtAct;
     QLabel *infoLabel;
-    QLabel *imageLabel;
     void displayFile();
 };
 //! [3]
